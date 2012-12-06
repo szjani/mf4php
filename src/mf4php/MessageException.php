@@ -23,43 +23,11 @@
 
 namespace mf4php;
 
-use mf4php\Message;
-use mf4php\MessageListener;
-use mf4php\Queue;
+use RuntimeException;
 
 /**
  * @author Szurovecz János <szjani@szjani.hu>
  */
-interface MessageDispatcher
+class MessageException extends RuntimeException
 {
-    /**
-     * @param Queue $queue
-     * @param Message $message
-     * @throws MessageException
-     */
-    public function send(Queue $queue, Message $message);
-
-    /**
-     * @param Queue $queue
-     * @param MessageListener $messageListener
-     */
-    public function addListener(Queue $queue, MessageListener $messageListener);
-
-    /**
-     * @param Queue $queue
-     * @param MessageListener $messageListener
-     */
-    public function removeListener(Queue $queue, MessageListener $messageListener);
-
-    /**
-     * @param Queue $queue
-     * @return array
-     */
-    public function getListeners(Queue $queue);
-
-    /**
-     * @param Queue $queue
-     * @return boolean
-     */
-    public function hasListeners(Queue $queue);
 }
