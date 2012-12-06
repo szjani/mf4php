@@ -14,5 +14,8 @@
     },
     "autoload": {
         "psr-0": {"mf4php": "src/"}
+    },
+    "suggest": {
+        "mf4php/mf4php-beanstalk": "If you want to use with Beanstalk"
     }
 }
