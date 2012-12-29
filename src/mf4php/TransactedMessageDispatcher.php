@@ -79,6 +79,8 @@ abstract class TransactedMessageDispatcher extends AbstractMessageDispatcher imp
     protected function stopBuffer()
     {
         $this->buffered = false;
+        $this->queueBuffer = array();
+        $this->messageBuffer = array();
     }
 
     /**
@@ -108,8 +110,6 @@ abstract class TransactedMessageDispatcher extends AbstractMessageDispatcher imp
                 $this->immediateSend($queue, $message);
             }
         }
-        $this->queueBuffer = array();
-        $this->messageBuffer = array();
     }
 
     /**

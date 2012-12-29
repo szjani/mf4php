@@ -201,6 +201,22 @@ class TransactedMessageDispatcherTest extends PHPUnit_Framework_TestCase
         $this->dispatcher->send($queue2, $message2);
         $this->tm->commit();
         self::assertFalse($this->dispatcher->isBuffered());
+    }
 
+    public function testTwoTransactionIfFirstIsFailed()
+    {
+        $message = $this->getMock(__NAMESPACE__ . '\Message');
+        $this->dispatcher
+            ->expects(self::once())
+            ->method('immediateSend')
+            ->with($this->queue, $message);
+
+        $this->tm->beginTransaction();
+        $this->dispatcher->send($this->queue, $message);
+        $this->tm->rollback();
+
+        $this->tm->beginTransaction();
+        $this->dispatcher->send($this->queue, $message);
+        $this->tm->commit();
     }
 }
