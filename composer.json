@@ -11,9 +11,8 @@
     ],
     "require": {
         "php": ">=5.3.0",
-        "trf4php/trf4php": "dev-master"
+        "trf4php/trf4php": "~1.1"
     },
-    "minimum-stability": "dev",
     "autoload": {
         "psr-0": {"mf4php": "src/"}
     },
