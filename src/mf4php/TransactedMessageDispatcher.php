@@ -102,11 +102,17 @@ abstract class TransactedMessageDispatcher extends AbstractMessageDispatcher imp
 
     /**
      * Send all buffered messages out.
+     * Message listeners can also send messages, so the member variables
+     * must be reset before sending the messages.
+     * Otherwise it would cause infinite loop.
      */
     protected function flush()
     {
-        foreach ($this->queueBuffer as $queue) {
-            foreach ($this->messageBuffer[$queue->getName()] as $message) {
+        $queueBuffer = $this->queueBuffer;
+        $messageBuffer = $this->messageBuffer;
+        $this->stopBuffer();
+        foreach ($queueBuffer as $queue) {
+            foreach ($messageBuffer[$queue->getName()] as $message) {
                 $this->immediateSend($queue, $message);
             }
         }
@@ -128,7 +134,7 @@ abstract class TransactedMessageDispatcher extends AbstractMessageDispatcher imp
             case ObservableTransactionManager::POST_COMMIT:
             case ObservableTransactionManager::POST_TRANSACTIONAL:
                 $this->flush();
-                // buffering must be stopped after flush
+                break;
             case ObservableTransactionManager::POST_ROLLBACK:
             case ObservableTransactionManager::ERROR_COMMIT:
             case ObservableTransactionManager::ERROR_ROLLBACK:

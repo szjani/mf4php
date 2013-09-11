@@ -34,12 +34,12 @@ class ObjectMessage implements Message
     /**
      * @var DateTime
      */
-    private $dateTime;
+    protected $dateTime;
 
     /**
      * @var Serializable
      */
-    private $object;
+    protected $object;
 
     public function __construct(Serializable $object)
     {
@@ -59,18 +59,13 @@ class ObjectMessage implements Message
 
     public function serialize()
     {
-        return serialize(
-            array(
-                'dateTime' => $this->dateTime,
-                'object' => $this->object
-            )
-        );
+        return serialize(get_object_vars($this));
     }
 
     public function unserialize($serialized)
     {
-        $array = unserialize($serialized);
-        $this->dateTime = $array['dateTime'];
-        $this->object = $array['object'];
+        foreach (unserialize($serialized) as $key => $value) {
+            $this->$key = $value;
+        }
     }
 }
