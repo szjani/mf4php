@@ -1,25 +1,5 @@
 <?php
-/*
- * Copyright (c) 2012 Szurovecz János
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+declare(strict_types=1);
 
 namespace mf4php;
 
@@ -39,7 +19,7 @@ use trf4php\TransactionManagerObserver;
  * You have to use the same ObservableTransactionManager object
  * for transaction handling as is passed to the constructor!
  *
- * @author Szurovecz János <szjani@szjani.hu>
+ * @author Janos Szurovecz <szjani@szjani.hu>
  */
 abstract class TransactedMessageDispatcher extends AbstractMessageDispatcher implements TransactionManagerObserver
 {
@@ -61,22 +41,22 @@ abstract class TransactedMessageDispatcher extends AbstractMessageDispatcher imp
      * This method is called to send buffered messages
      * or to send messages if buffering is turned off.
      */
-    abstract protected function immediateSend(Queue $queue, Message $message);
+    abstract protected function immediateSend(Queue $queue, Message $message) : void;
 
     /**
      * @return boolean
      */
-    public function isBuffered()
+    public function isBuffered() : bool
     {
         return $this->buffered;
     }
 
-    protected function startBuffer()
+    protected function startBuffer() : void
     {
         $this->buffered = true;
     }
 
-    protected function stopBuffer()
+    protected function stopBuffer() : void
     {
         $this->buffered = false;
         $this->queueBuffer = array();
@@ -90,7 +70,7 @@ abstract class TransactedMessageDispatcher extends AbstractMessageDispatcher imp
      * @param Queue $queue
      * @param Message $message
      */
-    final public function send(Queue $queue, Message $message)
+    final public function send(Queue $queue, Message $message) : void
     {
         if (!$this->isBuffered()) {
             $this->immediateSend($queue, $message);
@@ -106,7 +86,7 @@ abstract class TransactedMessageDispatcher extends AbstractMessageDispatcher imp
      * must be reset before sending the messages.
      * Otherwise it would cause infinite loop.
      */
-    protected function flush()
+    protected function flush() : void
     {
         $queueBuffer = $this->queueBuffer;
         $messageBuffer = $this->messageBuffer;
@@ -124,7 +104,7 @@ abstract class TransactedMessageDispatcher extends AbstractMessageDispatcher imp
      * @param ObservableTransactionManager $manager
      * @param string $event
      */
-    public function update(ObservableTransactionManager $manager, $event)
+    public function update(ObservableTransactionManager $manager, $event) : void
     {
         switch ($event) {
             case ObservableTransactionManager::POST_BEGIN_TRANSACTION:

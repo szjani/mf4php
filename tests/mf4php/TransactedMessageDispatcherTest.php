@@ -1,34 +1,15 @@
 <?php
-/*
- * Copyright (c) 2012 Szurovecz János
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+declare(strict_types=1);
 
 namespace mf4php;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
+use trf4php\AbstractObservableTransactionManager;
 
 /**
- * @author Szurovecz János <szjani@szjani.hu>
+ * @author Janos Szurovecz <szjani@szjani.hu>
  */
-class TransactedMessageDispatcherTest extends PHPUnit_Framework_TestCase
+class TransactedMessageDispatcherTest extends TestCase
 {
     /**
      * @var \trf4php\ObservableTransactionManager
@@ -50,17 +31,14 @@ class TransactedMessageDispatcherTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->queue = new DefaultQueue('q1');
-        $this->tm = $this->getMock(
-            'trf4php\AbstractObservableTransactionManager',
-            array(
-                'commitInner',
-                'beginTransactionInner',
-                'rollbackInner',
-                'transactionalInner'
-            )
-        );
-        $this->dispatcher = $this->getMock(__NAMESPACE__ . '\TransactedMessageDispatcher', array('immediateSend'), array($this->tm));
-        $this->listener = $this->getMock(__NAMESPACE__ . '\MessageListener');
+        $this->tm = $this->getMockBuilder(AbstractObservableTransactionManager::class)
+            ->setMethods(['commitInner', 'beginTransactionInner', 'rollbackInner', 'transactionalInner'])
+            ->getMock();
+        $this->dispatcher = $this->getMockBuilder(TransactedMessageDispatcher::class)
+            ->setMethods(['immediateSend'])
+            ->setConstructorArgs([$this->tm])
+            ->getMock();
+        $this->listener = $this->getMockBuilder(MessageListener::class)->getMock();
         $this->dispatcher->addListener($this->queue, $this->listener);
     }
 
@@ -71,7 +49,7 @@ class TransactedMessageDispatcherTest extends PHPUnit_Framework_TestCase
 
     public function testWithoutTransaction()
     {
-        $message = $this->getMock(__NAMESPACE__ . '\Message');
+        $message = $this->getMockBuilder(Message::class)->getMock();
         $this->dispatcher
             ->expects(self::once())
             ->method('immediateSend')
@@ -157,7 +135,7 @@ class TransactedMessageDispatcherTest extends PHPUnit_Framework_TestCase
 
     public function testWithTransactionRollback()
     {
-        $message = $this->getMock(__NAMESPACE__ . '\Message');
+        $message = $this->getMockBuilder(Message::class)->getMock();
         $this->dispatcher
             ->expects(self::never())
             ->method('immediateSend');
@@ -168,8 +146,8 @@ class TransactedMessageDispatcherTest extends PHPUnit_Framework_TestCase
 
     public function testDelayedSendInTransaction()
     {
-        $message = $this->getMock(__NAMESPACE__ . '\Message');
-        $message2 = $this->getMock(__NAMESPACE__ . '\Message');
+        $message = $this->getMockBuilder(Message::class)->getMock();
+        $message2 = $this->getMockBuilder(Message::class)->getMock();
         $queue2 = new DefaultQueue('q2');
         $this->dispatcher
             ->expects(self::at(0))
@@ -205,7 +183,7 @@ class TransactedMessageDispatcherTest extends PHPUnit_Framework_TestCase
 
     public function testTwoTransactionIfFirstIsFailed()
     {
-        $message = $this->getMock(__NAMESPACE__ . '\Message');
+        $message = $this->getMockBuilder(Message::class)->getMock();
         $this->dispatcher
             ->expects(self::once())
             ->method('immediateSend')
